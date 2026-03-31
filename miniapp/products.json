@@ -1,0 +1,30 @@
+{
+  "config": {
+    "channelLink": "https://t.me/your_channel",
+    "managerPhone": "+7XXXXXXXXXX",
+    "currency": "₽"
+  },
+  "products": [
+    {
+      "id": 1,
+      "name": "Товар A",
+      "description": "Описание товара A",
+      "price": 1999,
+      "inStock": true
+    },
+    {
+      "id": 2,
+      "name": "Товар B",
+      "description": "Описание товара B",
+      "price": 3499,
+      "inStock": true
+    },
+    {
+      "id": 3,
+      "name": "Товар C",
+      "description": "Описание товара C",
+      "price": 999,
+      "inStock": false
+    }
+  ]
+}
