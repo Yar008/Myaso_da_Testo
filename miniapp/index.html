@@ -196,7 +196,7 @@
   2. Создайте ключ для JavaScript API (бесплатно до 1000 запросов/сутки)
   3. Замените YOUR_YANDEX_MAPS_API_KEY ниже на ваш ключ
 -->
-<script src="https://api-maps.yandex.ru/2.1/?apikey=3dc88e7b-71e1-40f6-8f0b-26f5a474a244&lang=ru_RU"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=YOUR_YANDEX_MAPS_API_KEY&lang=ru_RU"></script>
 
 <script>
 const tg = window.Telegram?.WebApp;
@@ -257,43 +257,58 @@ function renderProducts() {
       <div class="product-body">
         <div class="product-name">${p.name}</div>
         ${p.description ? `<div class="product-desc">${p.description}</div>` : ''}
-        <div class="product-price">${p.price} ${CONFIG.currency}</div>
+        <div class="product-price">${p.price} ${CONFIG.currency}/кг</div>
         ${!p.inStock ? '<div class="out-of-stock-label">❌ Нет в наличии</div>' : ''}
       </div>
       <button class="add-btn" id="add-btn-${p.id}" onclick="addToCart(${p.id})" ${!p.inStock ? 'disabled' : ''}>+</button>
     </div>`).join('');
 }
 
-// ── Cart ──────────────────────────────────────────────────────────────────────
+// ── Cart (kg-based, step 0.5, min 0.5) ───────────────────────────────────────
+const STEP = 0.5;
+const MIN_KG = 0.5;
+
 function addToCart(id) {
-  cart[id] = (cart[id] || 0) + 1; updateBadge();
+  if (!cart[id]) cart[id] = MIN_KG;
+  else cart[id] = Math.round((cart[id] + STEP) * 10) / 10;
+  updateBadge();
   tg?.HapticFeedback?.impactOccurred('light');
   const btn = document.getElementById('add-btn-' + id);
-  if (btn) { btn.textContent = '✓'; btn.classList.add('added'); setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 700); }
+  if (btn) { btn.textContent = '✓'; btn.classList.add('added'); setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 600); }
+  renderCartPreview(id);
 }
 
-function changeQty(id, delta) {
-  cart[id] = (cart[id] || 0) + delta;
-  if (cart[id] <= 0) delete cart[id];
+function changeKg(id, delta) {
+  const current = cart[id] || 0;
+  const next = Math.round((current + delta) * 10) / 10;
+  if (next < MIN_KG) { delete cart[id]; }
+  else { cart[id] = next; }
   updateBadge(); renderCart();
 }
 
 function updateBadge() {
-  const total = Object.values(cart).reduce((a, b) => a + b, 0);
+  const hasItems = Object.keys(cart).length > 0;
   const badge = document.getElementById('cart-badge');
-  badge.style.display = total > 0 ? 'flex' : 'none';
-  badge.textContent = total;
+  badge.style.display = hasItems ? 'flex' : 'none';
+  badge.textContent = Object.keys(cart).length;
 }
 
 function cartTotal() {
-  return Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = PRODUCTS.find(p => p.id == id); return sum + (p ? p.price * qty : 0);
+  return Object.entries(cart).reduce((sum, [id, kg]) => {
+    const p = PRODUCTS.find(p => p.id == id); return sum + (p ? p.price * kg : 0);
   }, 0);
+}
+
+function renderCartPreview(id) {
+  // Update add button label if in products screen
+  const btn = document.getElementById('add-btn-' + id);
+  if (btn && cart[id]) { btn.textContent = cart[id] + ' кг'; btn.style.width = '58px'; btn.style.borderRadius = '16px'; }
+  else if (btn) { btn.textContent = '+'; btn.style.width = '34px'; btn.style.borderRadius = '50%'; }
 }
 
 function renderCart() {
   const el    = document.getElementById('cart-content');
-  const items = Object.entries(cart).filter(([_, q]) => q > 0);
+  const items = Object.entries(cart).filter(([_, kg]) => kg > 0);
   if (!items.length) {
     el.innerHTML = `
       <div class="empty"><div class="e-icon">🛒</div><div class="e-title">Корзина пуста</div><div class="e-sub">Добавьте товары из каталога</div></div>
@@ -302,17 +317,17 @@ function renderCart() {
   }
 
   const savedAddr = localStorage.getItem('deliveryAddress') || '';
-  const itemsHtml = items.map(([id, qty]) => {
+  const itemsHtml = items.map(([id, kg]) => {
     const p = PRODUCTS.find(p => p.id == id); if (!p) return '';
     return `<div class="cart-row">
       <div class="cart-row-info">
         <div class="cart-row-name">${p.name}</div>
-        <div class="cart-row-price">${p.price} × ${qty} = ${(p.price*qty).toFixed(2)} ${CONFIG.currency}</div>
+        <div class="cart-row-price">${p.price} ₽/кг × ${kg} кг = ${(p.price*kg).toFixed(2)} ${CONFIG.currency}</div>
       </div>
       <div class="qty-wrap">
-        <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
-        <span class="qty-num">${qty}</span>
-        <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+        <button class="qty-btn" onclick="changeKg(${id},-${STEP})">−</button>
+        <span class="qty-num">${kg} кг</span>
+        <button class="qty-btn" onclick="changeKg(${id},${STEP})">+</button>
       </div>
     </div>`;
   }).join('');
@@ -455,7 +470,7 @@ function placeOrder() {
   const address = (document.getElementById('addr-input')?.value?.trim() || localStorage.getItem('deliveryAddress') || '').trim();
   const promo   = document.getElementById('promo-input')?.value?.trim() || null;
   if (!address) { tg ? tg.showAlert('Укажите адрес доставки') : alert('Укажите адрес'); return; }
-  const items = Object.entries(cart).filter(([_,q])=>q>0).map(([id,qty])=>{ const p=PRODUCTS.find(p=>p.id==id); return { productId:parseInt(id), name:p.name, price:p.price, quantity:qty }; });
+  const items = Object.entries(cart).filter(([_,kg])=>kg>0).map(([id,kg])=>{ const p=PRODUCTS.find(p=>p.id==id); return { productId:parseInt(id), name:p.name, price:p.price, quantity:kg }; });
   if (!items.length) { tg?.showAlert('Корзина пуста'); return; }
   if (!tg) { alert('Откройте в Telegram'); return; }
   tg.sendData(JSON.stringify({ action:'order', items, address, promoCode:promo, total:cartTotal() }));
