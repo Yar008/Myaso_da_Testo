@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Магазин</title>
+  <title>Мясо да Тесто</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
     :root {
       --bg: var(--tg-theme-bg-color, #ffffff);
       --text: var(--tg-theme-text-color, #000000);
@@ -17,211 +16,154 @@
       --hint: var(--tg-theme-hint-color, #999999);
       --link: var(--tg-theme-link-color, #3390ec);
     }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 72px; font-size: 15px; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 72px;
-      font-size: 15px;
-    }
-
-    /* ── NAVIGATION ─────────────────────────────────────────────────── */
-    .nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--bg);
-      border-top: 1px solid var(--secondary);
-      display: flex; z-index: 200;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-    }
-    .nav-btn {
-      flex: 1; padding: 8px 0;
-      background: none; border: none; cursor: pointer;
-      color: var(--hint); font-size: 11px;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      transition: color 0.15s; position: relative;
-    }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid rgba(128,128,128,0.15); display: flex; z-index: 200; padding-bottom: env(safe-area-inset-bottom, 0); }
+    .nav-btn { flex: 1; padding: 8px 0; background: none; border: none; cursor: pointer; color: var(--hint); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: color 0.15s; position: relative; }
     .nav-btn.active { color: var(--btn); }
     .nav-icon { font-size: 22px; line-height: 1; }
-    .cart-badge {
-      position: absolute; top: 4px; right: calc(50% - 22px);
-      background: #ff3b30; color: #fff;
-      border-radius: 10px; min-width: 18px; height: 18px;
-      font-size: 11px; font-weight: 700;
-      display: none; align-items: center; justify-content: center;
-      padding: 0 4px;
-    }
+    .cart-badge { position: absolute; top: 4px; right: calc(50% - 22px); background: #ff3b30; color: #fff; border-radius: 10px; min-width: 18px; height: 18px; font-size: 11px; font-weight: 700; display: none; align-items: center; justify-content: center; padding: 0 4px; }
 
-    /* ── SCREENS ─────────────────────────────────────────────────────── */
     .screen { display: none; padding: 16px; animation: fadeIn 0.15s ease; }
     .screen.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
 
-    /* ── TYPOGRAPHY ──────────────────────────────────────────────────── */
     .page-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
-    .section-label {
-      font-size: 12px; font-weight: 600; color: var(--hint);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin: 16px 0 8px;
-    }
+    .section-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
 
-    /* ── CARD ────────────────────────────────────────────────────────── */
-    .card {
-      background: var(--secondary);
-      border-radius: 12px; padding: 14px;
-      margin-bottom: 10px;
-    }
+    .card { background: var(--secondary); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
 
-    /* ── BUTTONS ─────────────────────────────────────────────────────── */
-    .btn {
-      width: 100%; padding: 14px;
-      border-radius: 12px; border: none; cursor: pointer;
-      font-size: 15px; font-weight: 600;
-      transition: opacity 0.1s; margin-bottom: 8px;
-    }
+    .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: opacity 0.1s; margin-bottom: 8px; }
     .btn:active { opacity: 0.75; }
+    .btn:last-child { margin-bottom: 0; }
     .btn-primary { background: var(--btn); color: var(--btn-text); }
     .btn-secondary { background: var(--secondary); color: var(--text); }
-    .btn:last-child { margin-bottom: 0; }
 
-    /* ── INFO ROWS ───────────────────────────────────────────────────── */
-    .info-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(128,128,128,0.15);
-    }
+    .info-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.15); }
     .info-row:last-child { border-bottom: none; padding-bottom: 0; }
     .info-row .icon { font-size: 22px; flex-shrink: 0; }
     .info-row .label { font-size: 12px; color: var(--hint); margin-bottom: 2px; }
     .info-row .value { font-size: 14px; font-weight: 500; }
     .info-row a { color: var(--link); text-decoration: none; }
 
-    /* ── PRODUCT CARD ────────────────────────────────────────────────── */
-    .product-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px; background: var(--secondary);
-      border-radius: 12px; margin-bottom: 8px;
-    }
+    .product-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--secondary); border-radius: 12px; margin-bottom: 8px; }
     .product-body { flex: 1; min-width: 0; }
-    .product-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
     .product-desc { font-size: 12px; color: var(--hint); margin-bottom: 5px; }
     .product-price { font-weight: 700; color: var(--btn); font-size: 15px; }
     .out-of-stock-label { font-size: 12px; color: #ff3b30; }
-    .add-btn {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: none; background: var(--btn); color: var(--btn-text);
-      font-size: 22px; cursor: pointer; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.1s, background 0.2s;
-    }
+    .add-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--btn); color: var(--btn-text); font-size: 22px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: transform 0.1s, background 0.2s; }
     .add-btn:active { transform: scale(0.9); }
     .add-btn:disabled { background: var(--hint); cursor: not-allowed; }
     .add-btn.added { background: #34c759; }
 
-    /* ── CART ────────────────────────────────────────────────────────── */
-    .cart-row {
-      display: flex; align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(128,128,128,0.12);
-    }
+    .cart-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.12); }
     .cart-row:last-child { border-bottom: none; }
     .cart-row-info { flex: 1; min-width: 0; }
     .cart-row-name { font-weight: 600; font-size: 14px; }
     .cart-row-price { font-size: 13px; color: var(--hint); margin-top: 2px; }
     .qty-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .qty-btn {
-      width: 28px; height: 28px; border-radius: 50%;
-      border: none; background: var(--secondary); cursor: pointer;
-      font-size: 18px; display: flex; align-items: center; justify-content: center;
-    }
+    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--secondary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
     .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; padding: 4px 0; }
 
-    .total-row {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 16px; font-weight: 700; padding: 4px 0;
-    }
-
-    /* ── INPUT ───────────────────────────────────────────────────────── */
     .field-label { font-size: 13px; color: var(--hint); margin-bottom: 6px; display: block; }
-    .input {
-      width: 100%; padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.5px solid rgba(128,128,128,0.2);
-      background: var(--bg); color: var(--text);
-      font-size: 15px; outline: none;
-      transition: border-color 0.15s;
-    }
+    .input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid rgba(128,128,128,0.2); background: var(--bg); color: var(--text); font-size: 15px; outline: none; transition: border-color 0.15s; }
     .input:focus { border-color: var(--btn); }
 
-    /* ── PROMO DISPLAY ───────────────────────────────────────────────── */
-    .promo-box {
-      background: linear-gradient(135deg, #34c759, #30d158);
-      border-radius: 14px; padding: 20px; text-align: center;
-      color: white; margin-bottom: 12px;
-    }
-    .promo-box .promo-label { font-size: 13px; opacity: 0.85; margin-bottom: 6px; }
-    .promo-box .promo-value { font-size: 28px; font-weight: 800; letter-spacing: 2px; font-family: monospace; }
-    .promo-box .promo-hint { font-size: 12px; opacity: 0.75; margin-top: 6px; }
+    /* ── ADDRESS PICKER ── */
+    .addr-wrap { margin-bottom: 12px; }
+    .addr-display { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; border: 1.5px solid rgba(128,128,128,0.2); background: var(--bg); cursor: pointer; transition: border-color 0.15s; min-height: 48px; }
+    .addr-display:hover { border-color: var(--btn); }
+    .addr-display .addr-icon { font-size: 20px; flex-shrink: 0; }
+    .addr-display .addr-text { flex: 1; font-size: 14px; color: var(--hint); line-height: 1.35; }
+    .addr-display .addr-text.filled { color: var(--text); }
+    .addr-display .addr-edit { font-size: 12px; color: var(--btn); flex-shrink: 0; }
 
-    /* ── EMPTY STATE ─────────────────────────────────────────────────── */
+    /* ── MAP MODAL ── */
+    .map-modal { position: fixed; inset: 0; z-index: 500; display: none; flex-direction: column; background: var(--bg); }
+    .map-modal.open { display: flex; }
+    .map-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(128,128,128,0.15); flex-shrink: 0; }
+    .map-back { background: none; border: none; cursor: pointer; font-size: 22px; color: var(--btn); padding: 4px; line-height: 1; }
+    .map-title { font-weight: 700; font-size: 16px; flex: 1; }
+    .map-container { flex: 1; position: relative; overflow: hidden; }
+    #ymap { width: 100%; height: 100%; }
+    .map-pin { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); font-size: 36px; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); z-index: 10; transition: transform 0.12s; user-select: none; }
+    .map-pin.dragging { transform: translate(-50%, -115%) scale(1.2); }
+    .map-footer { padding: 12px 16px; border-top: 1px solid rgba(128,128,128,0.15); flex-shrink: 0; }
+    .map-addr-preview { font-size: 13px; color: var(--hint); margin-bottom: 10px; min-height: 18px; text-align: center; line-height: 1.4; }
+    .map-addr-preview.loaded { color: var(--text); font-weight: 500; }
+    .map-err { font-size: 13px; color: #ff3b30; text-align: center; padding: 8px; }
+
+    /* ── PROMO ── */
+    .promo-box { background: linear-gradient(135deg, #34c759, #30d158); border-radius: 14px; padding: 20px; text-align: center; color: white; margin-bottom: 12px; }
+    .promo-label { font-size: 13px; opacity: 0.85; margin-bottom: 6px; }
+    .promo-value { font-size: 28px; font-weight: 800; letter-spacing: 2px; font-family: monospace; }
+    .promo-hint { font-size: 12px; opacity: 0.75; margin-top: 6px; }
+
     .empty { text-align: center; padding: 48px 20px; color: var(--hint); }
     .empty .e-icon { font-size: 52px; margin-bottom: 12px; }
     .empty .e-title { font-weight: 600; font-size: 16px; color: var(--text); margin-bottom: 6px; }
     .empty .e-sub { font-size: 14px; }
-
-    /* ── HINT TEXT ───────────────────────────────────────────────────── */
     .hint { font-size: 13px; color: var(--hint); text-align: center; margin-top: 8px; }
     .hint a { color: var(--link); text-decoration: none; }
-
-    /* ── LOADING ─────────────────────────────────────────────────────── */
-    .loader { text-align: center; padding: 40px; color: var(--hint); }
   </style>
 </head>
 <body>
 
-<!-- ════════════ HOME ════════════ -->
-<div class="screen active" id="screen-home">
-  <p class="page-title">👋 Добро пожаловать!</p>
+<!-- MAP MODAL -->
+<div class="map-modal" id="map-modal">
+  <div class="map-header">
+    <button class="map-back" onclick="closeMap()">←</button>
+    <div class="map-title">📍 Укажите адрес доставки</div>
+  </div>
+  <div class="map-container">
+    <div id="ymap"></div>
+    <div class="map-pin" id="map-pin">📍</div>
+  </div>
+  <div class="map-footer">
+    <div class="map-addr-preview" id="map-addr-preview">Перемещайте карту чтобы выбрать адрес</div>
+    <button class="btn btn-primary" onclick="confirmAddress()">✅ Выбрать этот адрес</button>
+  </div>
+</div>
 
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <p class="page-title">🥩 Мясо да Тесто</p>
   <div class="card">
     <div class="info-row">
       <span class="icon">📢</span>
-      <div>
-        <div class="label">Наш канал</div>
-        <div class="value"><a id="channel-link" href="#" target="_blank">—</a></div>
-      </div>
+      <div><div class="label">Наш канал</div><div class="value"><a id="channel-link" href="#" target="_blank">—</a></div></div>
     </div>
     <div class="info-row">
       <span class="icon">📞</span>
-      <div>
-        <div class="label">Менеджер</div>
-        <div class="value" id="manager-phone">—</div>
-      </div>
+      <div><div class="label">Менеджер</div><div class="value" id="manager-phone">—</div></div>
+    </div>
+    <div class="info-row">
+      <span class="icon">📍</span>
+      <div><div class="label">Доставка по городу</div><div class="value">Астрахань</div></div>
     </div>
   </div>
-
   <div class="section-label">Действия</div>
   <button class="btn btn-primary" onclick="nav('promo')">🎁 Получить промокод</button>
   <button class="btn btn-secondary" onclick="nav('products')">🛍 Смотреть товары</button>
 </div>
 
-<!-- ════════════ PRODUCTS ════════════ -->
+<!-- PRODUCTS -->
 <div class="screen" id="screen-products">
   <p class="page-title">🛍 Товары</p>
-  <div id="products-list"><div class="loader">Загрузка...</div></div>
+  <div id="products-list"><div style="text-align:center;padding:40px;color:var(--hint)">Загрузка...</div></div>
 </div>
 
-<!-- ════════════ CART ════════════ -->
+<!-- CART -->
 <div class="screen" id="screen-cart">
   <p class="page-title">🛒 Корзина</p>
   <div id="cart-content"></div>
 </div>
 
-<!-- ════════════ PROMO ════════════ -->
+<!-- PROMO -->
 <div class="screen" id="screen-promo">
   <p class="page-title">🎁 Промокод</p>
-
   <div id="promo-has" style="display:none">
     <div class="promo-box">
       <div class="promo-label">Ваш персональный промокод</div>
@@ -230,86 +172,86 @@
     </div>
     <button class="btn btn-primary" onclick="nav('cart')">🛒 Перейти в корзину</button>
   </div>
-
   <div id="promo-form">
     <div class="card">
-      <p style="font-size:14px; color:var(--hint); margin-bottom:14px; line-height:1.5;">
-        Оставьте номер телефона и получите уникальный промокод со скидкой 🎉
-      </p>
+      <p style="font-size:14px;color:var(--hint);margin-bottom:14px;line-height:1.5;">Оставьте номер телефона и получите уникальный промокод 🎉</p>
       <label class="field-label">Номер телефона</label>
       <input type="tel" class="input" id="phone-input" placeholder="+7 (___) ___-__-__" style="margin-bottom:12px;">
       <button class="btn btn-primary" onclick="submitPhone()">Получить промокод</button>
-      <p class="hint" style="margin-top:10px;">Нажимая кнопку, вы соглашаетесь<br>на обработку персональных данных</p>
+      <p class="hint" style="margin-top:10px;">Нажимая кнопку, вы соглашаетесь на обработку персональных данных</p>
     </div>
   </div>
 </div>
 
-<!-- ════════════ NAV ════════════ -->
+<!-- NAV -->
 <nav class="nav">
-  <button class="nav-btn active" id="nav-home" onclick="nav('home')">
-    <span class="nav-icon">🏠</span><span>Главная</span>
-  </button>
-  <button class="nav-btn" id="nav-products" onclick="nav('products')">
-    <span class="nav-icon">🛍</span><span>Товары</span>
-  </button>
-  <button class="nav-btn" id="nav-cart" onclick="nav('cart')">
-    <span class="nav-icon">🛒</span><span>Корзина</span>
-    <span class="cart-badge" id="cart-badge"></span>
-  </button>
+  <button class="nav-btn active" id="nav-home"     onclick="nav('home')"><span class="nav-icon">🏠</span><span>Главная</span></button>
+  <button class="nav-btn"        id="nav-products" onclick="nav('products')"><span class="nav-icon">🛍</span><span>Товары</span></button>
+  <button class="nav-btn"        id="nav-cart"     onclick="nav('cart')"><span class="nav-icon">🛒</span><span>Корзина</span><span class="cart-badge" id="cart-badge"></span></button>
 </nav>
 
+<!--
+  YANDEX MAPS API KEY
+  1. Зайдите на developer.tech.yandex.ru
+  2. Создайте ключ для JavaScript API (бесплатно до 1000 запросов/сутки)
+  3. Замените YOUR_YANDEX_MAPS_API_KEY ниже на ваш ключ
+-->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=3dc88e7b-71e1-40f6-8f0b-26f5a474a244&lang=ru_RU"></script>
+
 <script>
-// ── Telegram WebApp ──────────────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-// ── State ────────────────────────────────────────────────────────────────────
-let CONFIG = { channelLink: '', managerPhone: '', currency: '₴' };
+// Астрахань — центр и ограничения карты
+const ASTRAKHAN   = [46.3497, 48.0408];
+const CITY_BOUNDS = [[46.20, 47.75], [46.50, 48.30]];
+
+let CONFIG   = { channelLink: '', managerPhone: '', currency: '₽' };
 let PRODUCTS = [];
-let cart = {};      // { id: qty }
+let cart     = {};
 let promoCode = localStorage.getItem('promoCode') || null;
 
-// Promo passed via URL hash after bot generates it: index.html#promo=XXXXXXXX
 const hashPromo = new URLSearchParams(window.location.hash.slice(1)).get('promo');
 if (hashPromo) { promoCode = hashPromo; localStorage.setItem('promoCode', promoCode); }
 
-// ── Load data ────────────────────────────────────────────────────────────────
+// Map
+let ymap         = null;
+let mapReady     = false;
+let pendingAddr  = '';
+let geocodeTimer = null;
+
+// ── Load config ───────────────────────────────────────────────────────────────
 async function init() {
   try {
-    const res = await fetch('./products.json?' + Date.now());
+    const res  = await fetch('./products.json?' + Date.now());
     const data = await res.json();
     CONFIG   = { ...CONFIG, ...data.config };
     PRODUCTS = data.products || [];
-
     const cl = document.getElementById('channel-link');
-    cl.href = CONFIG.channelLink;
-    cl.textContent = CONFIG.channelLink;
+    cl.href = CONFIG.channelLink; cl.textContent = CONFIG.channelLink;
     document.getElementById('manager-phone').textContent = CONFIG.managerPhone;
     renderProducts();
   } catch {
     document.getElementById('products-list').innerHTML =
-      '<div class="empty"><div class="e-icon">❌</div><div class="e-title">Ошибка загрузки</div><div class="e-sub">Попробуйте позже</div></div>';
+      '<div class="empty"><div class="e-icon">❌</div><div class="e-title">Ошибка загрузки</div></div>';
   }
 }
 
-// ── Navigation ───────────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────────────────
 function nav(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   const nb = document.getElementById('nav-' + name);
   if (nb) nb.classList.add('active');
-  if (name === 'cart')    renderCart();
-  if (name === 'promo')   renderPromo();
+  if (name === 'cart')  renderCart();
+  if (name === 'promo') renderPromo();
 }
 
-// ── Products ─────────────────────────────────────────────────────────────────
+// ── Products ──────────────────────────────────────────────────────────────────
 function renderProducts() {
   const el = document.getElementById('products-list');
-  if (!PRODUCTS.length) {
-    el.innerHTML = '<div class="empty"><div class="e-icon">📦</div><div class="e-title">Товаров пока нет</div></div>';
-    return;
-  }
+  if (!PRODUCTS.length) { el.innerHTML = '<div class="empty"><div class="e-icon">📦</div><div class="e-title">Товаров пока нет</div></div>'; return; }
   el.innerHTML = PRODUCTS.map(p => `
     <div class="product-item">
       <div class="product-body">
@@ -322,24 +264,18 @@ function renderProducts() {
     </div>`).join('');
 }
 
-// ── Cart operations ───────────────────────────────────────────────────────────
+// ── Cart ──────────────────────────────────────────────────────────────────────
 function addToCart(id) {
-  cart[id] = (cart[id] || 0) + 1;
-  updateBadge();
+  cart[id] = (cart[id] || 0) + 1; updateBadge();
   tg?.HapticFeedback?.impactOccurred('light');
   const btn = document.getElementById('add-btn-' + id);
-  if (btn) {
-    btn.textContent = '✓';
-    btn.classList.add('added');
-    setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 700);
-  }
+  if (btn) { btn.textContent = '✓'; btn.classList.add('added'); setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 700); }
 }
 
 function changeQty(id, delta) {
   cart[id] = (cart[id] || 0) + delta;
   if (cart[id] <= 0) delete cart[id];
-  updateBadge();
-  renderCart();
+  updateBadge(); renderCart();
 }
 
 function updateBadge() {
@@ -351,60 +287,151 @@ function updateBadge() {
 
 function cartTotal() {
   return Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = PRODUCTS.find(p => p.id == id);
-    return sum + (p ? p.price * qty : 0);
+    const p = PRODUCTS.find(p => p.id == id); return sum + (p ? p.price * qty : 0);
   }, 0);
 }
 
 function renderCart() {
-  const el = document.getElementById('cart-content');
+  const el    = document.getElementById('cart-content');
   const items = Object.entries(cart).filter(([_, q]) => q > 0);
   if (!items.length) {
     el.innerHTML = `
-      <div class="empty">
-        <div class="e-icon">🛒</div>
-        <div class="e-title">Корзина пуста</div>
-        <div class="e-sub">Добавьте товары из каталога</div>
-      </div>
+      <div class="empty"><div class="e-icon">🛒</div><div class="e-title">Корзина пуста</div><div class="e-sub">Добавьте товары из каталога</div></div>
       <button class="btn btn-primary" onclick="nav('products')" style="margin-top:16px;">Смотреть товары</button>`;
     return;
   }
 
+  const savedAddr = localStorage.getItem('deliveryAddress') || '';
   const itemsHtml = items.map(([id, qty]) => {
-    const p = PRODUCTS.find(p => p.id == id);
-    if (!p) return '';
-    return `
-      <div class="cart-row">
-        <div class="cart-row-info">
-          <div class="cart-row-name">${p.name}</div>
-          <div class="cart-row-price">${p.price} × ${qty} = ${(p.price * qty).toFixed(2)} ${CONFIG.currency}</div>
-        </div>
-        <div class="qty-wrap">
-          <button class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
-          <span class="qty-num">${qty}</span>
-          <button class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
-        </div>
-      </div>`;
+    const p = PRODUCTS.find(p => p.id == id); if (!p) return '';
+    return `<div class="cart-row">
+      <div class="cart-row-info">
+        <div class="cart-row-name">${p.name}</div>
+        <div class="cart-row-price">${p.price} × ${qty} = ${(p.price*qty).toFixed(2)} ${CONFIG.currency}</div>
+      </div>
+      <div class="qty-wrap">
+        <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+        <span class="qty-num">${qty}</span>
+        <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+      </div>
+    </div>`;
   }).join('');
 
   el.innerHTML = `
     <div class="card">${itemsHtml}</div>
-    <div class="card">
-      <div class="total-row"><span>Итого:</span><span>${cartTotal().toFixed(2)} ${CONFIG.currency}</span></div>
+    <div class="card"><div class="total-row"><span>Итого:</span><span>${cartTotal().toFixed(2)} ${CONFIG.currency}</span></div></div>
+    <div class="addr-wrap">
+      <label class="field-label">📍 Адрес доставки (Астрахань) *</label>
+      <div class="addr-display" onclick="openMap()">
+        <span class="addr-icon">🗺</span>
+        <span class="addr-text ${savedAddr ? 'filled' : ''}" id="addr-text">${savedAddr || 'Нажмите, чтобы выбрать на карте'}</span>
+        <span class="addr-edit">${savedAddr ? 'Изменить' : 'Выбрать'}</span>
+      </div>
+      <input type="text" class="input" id="addr-input" style="margin-top:8px;" placeholder="или введите вручную" value="${savedAddr}" oninput="onAddrInput(this.value)">
     </div>
     <div style="margin-bottom:12px;">
       <label class="field-label">Промокод ${promoCode ? '✅' : '(необязательно)'}</label>
       <input type="text" class="input" id="promo-input" placeholder="Введите промокод" value="${promoCode || ''}">
     </div>
-    <div style="margin-bottom:16px;">
-      <label class="field-label">Адрес доставки *</label>
-      <textarea class="input" id="addr-input" rows="2" placeholder="г. Город, ул. Улица, д. 1, кв. 1" style="resize:none;"></textarea>
-    </div>
     <button class="btn btn-primary" onclick="placeOrder()">📦 Оформить заказ</button>
     ${!promoCode ? `<p class="hint">Нет промокода? <a href="#" onclick="nav('promo');return false;">Получить бесплатно</a></p>` : ''}`;
 }
 
-// ── Promo ────────────────────────────────────────────────────────────────────
+function onAddrInput(val) {
+  localStorage.setItem('deliveryAddress', val);
+  const t = document.getElementById('addr-text');
+  if (t) { t.textContent = val || 'Нажмите, чтобы выбрать на карте'; t.className = 'addr-text' + (val ? ' filled' : ''); }
+}
+
+// ── Yandex Maps ───────────────────────────────────────────────────────────────
+function openMap() {
+  document.getElementById('map-modal').classList.add('open');
+  if (!mapReady) initMap(); else scheduleGeocode();
+}
+
+function closeMap() {
+  document.getElementById('map-modal').classList.remove('open');
+}
+
+function initMap() {
+  if (typeof ymaps === 'undefined') {
+    document.getElementById('map-addr-preview').innerHTML =
+      '<span style="color:#ff3b30">⚠️ Карта недоступна — введите адрес вручную</span>';
+    return;
+  }
+
+  ymaps.ready(() => {
+    ymap = new ymaps.Map('ymap', {
+      center: ASTRAKHAN, zoom: 13,
+      controls: ['zoomControl']
+    }, { restrictMapArea: CITY_BOUNDS });
+
+    // Restore saved address position
+    const saved = localStorage.getItem('deliveryAddress');
+    if (saved) {
+      ymaps.geocode('Астрахань, ' + saved, { results: 1 }).then(r => {
+        const obj = r.geoObjects.get(0);
+        if (obj) ymap.setCenter(obj.geometry.getCoordinates(), 16);
+      });
+    }
+
+    ymap.events.add('actionbegin', () => {
+      document.getElementById('map-pin').classList.add('dragging');
+      document.getElementById('map-addr-preview').textContent = 'Определяем адрес...';
+      document.getElementById('map-addr-preview').className = 'map-addr-preview';
+      clearTimeout(geocodeTimer);
+    });
+
+    ymap.events.add('actionend', () => {
+      document.getElementById('map-pin').classList.remove('dragging');
+      scheduleGeocode();
+    });
+
+    mapReady = true;
+    scheduleGeocode();
+  });
+}
+
+function scheduleGeocode() {
+  clearTimeout(geocodeTimer);
+  geocodeTimer = setTimeout(reverseGeocode, 500);
+}
+
+function reverseGeocode() {
+  if (!ymap) return;
+  const centre = ymap.getCenter();
+  ymaps.geocode(centre, { results: 1 }).then(res => {
+    const obj = res.geoObjects.get(0);
+    if (!obj) { pendingAddr = centre.map(v => v.toFixed(6)).join(', '); setPreview(pendingAddr); return; }
+    const full = obj.properties.get('metaDataProperty.GeocoderMetaData')?.text || obj.properties.get('name') || '';
+    // Strip country/oblast prefix
+    const short = full.replace(/^Россия,\s*/,'').replace(/^Астраханская область,\s*/,'').trim();
+    pendingAddr = short;
+    setPreview(short);
+  }).catch(() => {
+    pendingAddr = centre.map(v => v.toFixed(6)).join(', ');
+    setPreview(pendingAddr);
+  });
+}
+
+function setPreview(addr) {
+  const el = document.getElementById('map-addr-preview');
+  el.textContent = addr || 'Адрес не определён';
+  el.className = 'map-addr-preview' + (addr ? ' loaded' : '');
+}
+
+function confirmAddress() {
+  if (!pendingAddr) { tg?.showAlert('Подождите, адрес ещё определяется...'); return; }
+  localStorage.setItem('deliveryAddress', pendingAddr);
+  closeMap();
+  const inp = document.getElementById('addr-input');
+  const txt = document.getElementById('addr-text');
+  if (inp) inp.value = pendingAddr;
+  if (txt) { txt.textContent = pendingAddr; txt.className = 'addr-text filled'; }
+  tg?.HapticFeedback?.notificationOccurred('success');
+}
+
+// ── Promo ─────────────────────────────────────────────────────────────────────
 function renderPromo() {
   if (promoCode) {
     document.getElementById('promo-has').style.display  = 'block';
@@ -418,36 +445,22 @@ function renderPromo() {
 
 function submitPhone() {
   const phone = document.getElementById('phone-input').value.trim();
-  if (phone.replace(/\D/g, '').length < 7) {
-    tg ? tg.showAlert('Введите корректный номер телефона') : alert('Введите корректный номер телефона');
-    return;
-  }
+  if (phone.replace(/\D/g,'').length < 7) { tg ? tg.showAlert('Введите корректный номер') : alert('Введите номер'); return; }
   if (!tg) { alert('Откройте в Telegram'); return; }
   tg.sendData(JSON.stringify({ action: 'request_promo', phone }));
 }
 
-// ── Order ────────────────────────────────────────────────────────────────────
+// ── Order ─────────────────────────────────────────────────────────────────────
 function placeOrder() {
-  const address = document.getElementById('addr-input')?.value?.trim();
+  const address = (document.getElementById('addr-input')?.value?.trim() || localStorage.getItem('deliveryAddress') || '').trim();
   const promo   = document.getElementById('promo-input')?.value?.trim() || null;
-
-  if (!address) {
-    tg ? tg.showAlert('Пожалуйста, введите адрес доставки') : alert('Введите адрес доставки');
-    return;
-  }
-
-  const items = Object.entries(cart).filter(([_, q]) => q > 0).map(([id, qty]) => {
-    const p = PRODUCTS.find(p => p.id == id);
-    return { productId: parseInt(id), name: p.name, price: p.price, quantity: qty };
-  });
-
+  if (!address) { tg ? tg.showAlert('Укажите адрес доставки') : alert('Укажите адрес'); return; }
+  const items = Object.entries(cart).filter(([_,q])=>q>0).map(([id,qty])=>{ const p=PRODUCTS.find(p=>p.id==id); return { productId:parseInt(id), name:p.name, price:p.price, quantity:qty }; });
   if (!items.length) { tg?.showAlert('Корзина пуста'); return; }
   if (!tg) { alert('Откройте в Telegram'); return; }
-
-  tg.sendData(JSON.stringify({ action: 'order', items, address, promoCode: promo, total: cartTotal() }));
+  tg.sendData(JSON.stringify({ action:'order', items, address, promoCode:promo, total:cartTotal() }));
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
 init();
 updateBadge();
 </script>
